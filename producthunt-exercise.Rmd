@@ -1,0 +1,63 @@
+---
+title: "producthunt-exercise"
+author: "刘家钰"
+date: "2019/2/15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(ggthemes)
+library(lubridate)
+
+AllTopics <- read.csv('/Users/l.crystal/Desktop/producthunt-exercise/Data/AllTopics.csv')
+PostsForAnalysis <- read.csv('/Users/l.crystal/Desktop/producthunt-exercise/Data/PostsForAnalysis.csv')
+PostsTopicsForAnalysis <- read.csv('/Users/l.crystal/Desktop/producthunt-exercise/Data/PostsTopicsForAnalysis.csv')
+UsersForAnalysis <- read.csv('/Users/l.crystal/Desktop/producthunt-exercise/Data/UsersForAnalysis.csv')
+```
+
+```{r AllTopics, echo=FALSE}
+AllTopics1 <- AllTopics %>% 
+  arrange(desc(num_posts)) %>% 
+  head(20)
+
+AllTopics1 %>% 
+  ggplot(aes(x=factor(name),y=num_posts)) + 
+  labs(x="Topic",y="# Posts") +
+  geom_bar(stat = "identity", width = 0.1,size=0.25,fill="lightblue",alpha=1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5)) +
+  geom_point(aes(x=name,y=num_followers,size=num_followers))
+
+```
+
+
+
+```{r PostsForAnalysis, echo=FALSE}
+PostsForAnalysis1 <- PostsForAnalysis %>% 
+  select(date,time_of_day,votes_count) %>% 
+  mutate(year=year(date)) %>% 
+  group_by(year,time_of_day) %>% 
+  summarise(votes_count=sum(votes_count))
+
+PostsForAnalysis1$time_of_day=factor(PostsForAnalysis1$time_of_day,levels=c("Morning","Afternoon","Evenging","Night"))
+
+PostsForAnalysis1 %>% 
+  ggplot(aes(x=year,y=votes_count,fill = time_of_day)) +
+  geom_bar(stat="identity",position="dodge") +
+  #labs(x="Year",y="# Votes（'000）") 
+  scale_fill_discrete(limits=c("Morning","Afternoon","Evenging","Night"))
+
+```
+```{r third, echo=FALSE}
+UsersForAnalysis1 <- UsersForAnalysis %>% 
+  filter(posts_count>30) %>% 
+  select(name,posts_count,votes_count)
+  #group_by(name) %>% 
+  #summarise(votes_count=sum(votes_count),num=n()) %>% 
+  #mutate(ave=votes_count/num) %>% 
+  #arrange(desc(ave)) %>% 
+  #head(20)
+```
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
